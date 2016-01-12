@@ -1,7 +1,8 @@
 $(function() {
 
     var campaignId = 16400,
-        adGroupId = 13470
+        adGroupId = 13470,
+        region = [] 
 
     var impsLabel = "impressions", 
         clicksLabel = "clicks"
@@ -16,16 +17,41 @@ $(function() {
 
     var updateInterval = 1000;
 
+
+    function addShowCity(city){ 
+      if(region.includes("all")){region = []}
+      if(city == "all"){
+        region = ["all"]
+      }else{
+        region.push(city);
+      }
+      //console.log(region)
+      fetchData();
+    }
+
+    
+
     function getClicksAndImps(){
       $.ajax({
         dataType: "json",
-        url: "http://eom.optimix.asia/Report/realtimeImpClick/"+campaignId+"/"+adGroupId,
+        url: "http://eom.optimix.asia/Report/realtimeImpClick/"+campaignId+"/"+adGroupId+"/V2",
         type: 'GET',
         success: function(data){
+          data["effect"] = [];
           for(var i=0;i<5;i++){
-            data[i]["imps"] = eval(data[i]["imps"])
-            data[i]["clicks"] = eval(data[i]["clicks"])
-            checkupSameData($.extend(true, {}, data[i]))
+            var imp_count = Array(60).fill(0);
+            var clicks_count = Array(60).fill(0);
+            data["effect"][i] = {}
+            $.each(region, function(index, value) {
+              data[value][i]["imps"] = eval(data[value][i]["imps"])
+              data[value][i]["clicks"] = eval(data[value][i]["clicks"])
+              for(var j=0;j<60;j++){ imp_count[j] += data[value][i]["imps"][j]; clicks_count[j] += data[value][i]["clicks"][j];  }
+            });
+            data["effect"][i]["imps"] = imp_count;
+            data["effect"][i]["clicks"] = clicks_count;
+            data["effect"][i]["index"] = data["all"][i]["index"]
+            //console.log(data)
+            checkupSameData($.extend(true, {}, data["effect"][i]))
           }
         },
         error: function(e){
@@ -45,7 +71,8 @@ $(function() {
       setTimeout(fetchData, fetchInterval);
     }
     
-    fetchData();
+    addShowCity("all")
+  
 
     function formatMaxData(max){ return Math.ceil(max/5)*5 }
 
@@ -112,9 +139,6 @@ $(function() {
         tickColor: "#E2E6EE"
       },
       colors: ["#e52a32", "#cccccc"],
-      // lines: {
-      //     fill: true,
-      // },
       yaxis: {
         min: 0,
         max: defaultYaxes
