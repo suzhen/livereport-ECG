@@ -1,12 +1,12 @@
 $(function() {
 
-    var campaignId = 16395,
-        adGroupId = 13473
+    var campaignId = 16400,
+        adGroupId = 13470
 
     var impsLabel = "impressions", 
         clicksLabel = "clicks"
 
-    var totalPoints = 90, //make sure not less 60
+    var totalPoints = 60, //make sure not less 60
         defaultYaxes = 5
 
     var totalData = [],
@@ -95,7 +95,7 @@ $(function() {
     }
 
   
-    var plot = $.plot("#placeholder",[getSerialData(0)["impsData"],getSerialData(0)["clicksData"]], {
+    var plot = $.plot("#placeholder",[getSerialData(0)["impsData"]], {   //,getSerialData(0)["clicksData"]
       series: {
         lines: {
           show: true
@@ -111,10 +111,10 @@ $(function() {
         borderWidth: 1,
         tickColor: "#E2E6EE"
       },
-      colors: ["#333333", "#cccccc"],
-      lines: {
-          fill: true,
-      },
+      colors: ["#e52a32", "#cccccc"],
+      // lines: {
+      //     fill: true,
+      // },
       yaxis: {
         min: 0,
         max: defaultYaxes
@@ -123,11 +123,11 @@ $(function() {
 
     $("<div id='tooltip'></div>").css({
       position: "absolute",
-      background: "#333333",
+      background: "#F8F8F8",
       padding: "3px 10px",
       display: "none",
       padding: "3px 10px",
-      color: "#ffffff",
+      color: "#000",
       opacity: 0.9
     }).appendTo("body");
 
@@ -149,7 +149,7 @@ $(function() {
 
       var newScopeData = getSerialData(series);
 
-      plot.setData([newScopeData["impsData"],newScopeData["clicksData"]]);
+      plot.setData([newScopeData["impsData"]]);  //,newScopeData["clicksData"]
 
       if(newScopeData["max_impsData"] > defaultYaxes) {
 
