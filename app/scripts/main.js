@@ -27,9 +27,8 @@ $(function() {
       }
       //console.log(region)
       fetchData();
+      getLastHourClicksAndImps();
     }
-
-    
 
     function getClicksAndImps(){
       $.ajax({
@@ -105,27 +104,44 @@ $(function() {
     function getSerialData(index){     
       var scope = calculateScope(index);
       var data = sliceData(scope["begin_min"],scope["begin_sec"],scope["end_min"],scope["end_sec"]);
+      return formatData(data,totalPoints) 
+    }
+
+    function formatData(data,length){
       var max_impsData = 0 , max_clicksData = 0 , impsData = [] , clicksData = []
       if(data.length!=0){
-        for(var i=0;i < totalPoints;i++ ){
+        for(var i=0;i < length;i++ ){
           impsData[i] = [i,data[0][i] === undefined ? 0 : data[0][i]]; 
           clicksData[i] = [i,data[1][i] === undefined ? 0 : data[1][i]];
         }
         max_impsData = Math.max(...data[0]); max_clicksData = Math.max(...data[1])     
       }else{
-        for(var i=0;i < totalPoints;i++ ){impsData[i] = [i,0]; clicksData[i] = [i,0];}    
+        for(var i=0;i < length;i++ ){impsData[i] = [i,0]; clicksData[i] = [i,0];}    
       }
       return {"impsData":{data:impsData,label:impsLabel},
               "clicksData":{data:clicksData,label:clicksLabel},
               "max_impsData":formatMaxData(max_impsData),
               "max_clicksData":formatMaxData(max_clicksData)}
+
     }
 
+    function showInfo(item){
+      if (item) {
+        var x = item.datapoint[0],
+          y = item.datapoint[1];
+        $("#tooltip").html(y + " " + item.series.label)
+          .css({top: item.pageY+5, left: item.pageX+5})
+          .fadeIn(200);
+      } else {
+        $("#tooltip").hide();
+      }     
+    }
   
     var plot = $.plot("#placeholder",[getSerialData(0)["impsData"]], {   //,getSerialData(0)["clicksData"]
       series: {
         lines: {
-          show: true
+          show: true,
+          fill: true
         },
         points: {
           show: true
@@ -156,15 +172,7 @@ $(function() {
     }).appendTo("body");
 
     $("#placeholder").bind("plothover", function (event, pos, item) {
-      if (item) {
-        var x = item.datapoint[0],
-          y = item.datapoint[1];
-        $("#tooltip").html(y + " " + item.series.label)
-          .css({top: item.pageY+5, left: item.pageX+5})
-          .fadeIn(200);
-      } else {
-        $("#tooltip").hide();
-      }
+      showInfo(item)
     })
     
     var series = 0 
@@ -193,6 +201,64 @@ $(function() {
     }
 
     update();
+
+    //*********************************************************************//
+   
+    function getLastHourClicksAndImps(){
+      $.ajax({
+        dataType: "json",
+        url: "http://eom.optimix.asia/Report/realtimeMinutes/"+10619+"/"+9703,
+        type: 'GET',
+        success: function(data){        
+          data["effect"] = {};
+          var imp_count = Array(60).fill(0);
+          var clicks_count = Array(60).fill(0);
+          $.each(region, function(index, value) {
+              data[value]["imps"] = eval(data[value]["imps"]); data[value]["clicks"] = eval(data[value]["clicks"]);
+              for(var j=0;j<60;j++){ imp_count[j] += data[value]["imps"][j]; clicks_count[j] += data[value]["clicks"][j];  }
+          });
+          data["effect"]["imps"] = imp_count;
+          data["effect"]["clicks"] = clicks_count;
+          data["effect"]["index"] = data["all"]["index"];
+          var ret = getHourSerialData($.extend(true, {}, data["effect"]));
+          var hourplot = $.plot("#hourplaceholder",[ret["impsData"]], { 
+            series: {
+              lines: {
+                show: true
+              },
+              points: {
+                show: true
+              },
+              shadowSize: 0 // Drawing is faster without shadows
+            },
+            grid: {
+              hoverable: true,
+              borderColor: "#E2E6EE",
+              borderWidth: 1,
+              tickColor: "#E2E6EE"
+            },
+            colors: ["#e52a32"],
+            yaxis: {
+              min: 0,
+              max: ret["max_impsData"]
+            }
+          });
+          $("#hourplaceholder").bind("plothover", function (event, pos, item) {
+            showInfo(item)
+          })
+
+        },
+        error: function(e){
+        }
+      });
+    }
+
+    function getHourSerialData(data){
+      return formatData([data["imps"],data["clicks"]],60)
+    }
+
+   
+
 
   });
 
