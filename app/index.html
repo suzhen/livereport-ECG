@@ -16,6 +16,7 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/timeline.css">
     <!-- endbuild -->
   </head>
   <body>
@@ -25,34 +26,456 @@
 
     
     <div class="container">
-      <div class="header">
-        <h3 class="text-muted">livereport</h3>
+      <div class="row-fluid">
+        <div class="col-md-12">
+          <div class="header">
+            <h3 class="text-muted">livereport</h3>
+          </div>
+        </div>
       </div>
 
-      
+      <div class="row-fluid">
+        <div class="col-md-8">
+          <form class="form-inline">
+            <div class="form-group">
+              <label for="campaignId">campaignId</label>
+              <input type="text" class="form-control" id="campaignId" placeholder="" value="16606">
+            </div>
+            <div class="form-group">
+              <label for="adGroupId">adGroupId</label>
+              <input type="text" class="form-control" id="adGroupId" placeholder="" value="5516">
+            </div>
+            <button type="button" class="btn btn-default" id="showbutton">Set</button>
+          </form>
+        </div>
+        <div class="col-md-4">
+          <select id="citiesSelect" data-placeholder="Choose Cities" class="chosen-select" multiple>
+            <option value="All">All</option>
+            <option value="Aksu">Aksu</option>
+            <option value="Alxa">Alxa</option>
+            <option value="Ankang">Ankang</option>
+            <option value="Anqing">Anqing</option>
+            <option value="Anshan">Anshan</option>
+            <option value="Anshun">Anshun</option>
+            <option value="Anyang">Anyang</option>
+            <option value="Baicheng">Baicheng</option>
+            <option value="Baishan">Baishan</option>
+            <option value="Baiyin">Baiyin</option>
+            <option value="Baoding">Baoding</option>
+            <option value="Baoji">Baoji</option>
+            <option value="Baoshan">Baoshan</option>
+            <option value="Baotou">Baotou</option>
+            <option value="Bayannur">Bayannur</option>
+            <option value="Bayingolin">Bayingolin</option>
+            <option value="Bazhong">Bazhong</option>
+            <option value="Beihai">Beihai</option>
+            <option value="Beijing">Beijing</option>
+            <option value="Bengbu">Bengbu</option>
+            <option value="Benxi">Benxi</option>
+            <option value="Bijie">Bijie</option>
+            <option value="Binzhou">Binzhou</option>
+            <option value="Bortala">Bortala</option>
+            <option value="Bose">Bose</option>
+            <option value="Bozhou">Bozhou</option>
+            <option value="Cangzhou">Cangzhou</option>
+            <option value="Changchun">Changchun</option>
+            <option value="Changde">Changde</option>
+            <option value="Changji">Changji</option>
+            <option value="Changsha">Changsha</option>
+            <option value="Changzhi">Changzhi</option>
+            <option value="Changzhou">Changzhou</option>
+            <option value="Chaohu">Chaohu</option>
+            <option value="Chaoyang">Chaoyang</option>
+            <option value="Chaozhou">Chaozhou</option>
+            <option value="Chengde">Chengde</option>
+            <option value="Chengdu">Chengdu</option>
+            <option value="Chenzhou">Chenzhou</option>
+            <option value="Chifeng">Chifeng</option>
+            <option value="Chizhou">Chizhou</option>
+            <option value="Chongqing">Chongqing</option>
+            <option value="Chongzuo">Chongzuo</option>
+            <option value="Chuxiong">Chuxiong</option>
+            <option value="Chuzhou">Chuzhou</option>
+            <option value="Da Hinggan Ling">Da Hinggan Ling</option>
+            <option value="Dali">Dali</option>
+            <option value="Dalian">Dalian</option>
+            <option value="Dandong">Dandong</option>
+            <option value="Daqing">Daqing</option>
+            <option value="Datong">Datong</option>
+            <option value="Dazhou">Dazhou</option>
+            <option value="Deyang">Deyang</option>
+            <option value="Dezhou">Dezhou</option>
+            <option value="Dingxi">Dingxi</option>
+            <option value="Dongguan">Dongguan</option>
+            <option value="Dongying">Dongying</option>
+            <option value="Enshi">Enshi</option>
+            <option value="Ezhou">Ezhou</option>
+            <option value="Fangchenggang">Fangchenggang</option>
+            <option value="Foshan">Foshan</option>
+            <option value="Fushun">Fushun</option>
+            <option value="Fuxin">Fuxin</option>
+            <option value="Fuyang">Fuyang</option>
+            <option value="Fuzhou">Fuzhou</option>
+            <option value="fuzhou">fuzhou</option>
+            <option value="Ganzhou">Ganzhou</option>
+            <option value="Golog">Golog</option>
+            <option value="Guang'an">Guang'an</option>
+            <option value="Guangyuan">Guangyuan</option>
+            <option value="Guangzhou">Guangzhou</option>
+            <option value="Guigang">Guigang</option>
+            <option value="Guilin">Guilin</option>
+            <option value="Guiyang">Guiyang</option>
+            <option value="Guyuan">Guyuan</option>
+            <option value="Haibei">Haibei</option>
+            <option value="Haikou">Haikou</option>
+            <option value="Handan">Handan</option>
+            <option value="Hangzhou">Hangzhou</option>
+            <option value="Hanzhong">Hanzhong</option>
+            <option value="Harbin">Harbin</option>
+            <option value="Hebi">Hebi</option>
+            <option value="Hechi">Hechi</option>
+            <option value="Hefei">Hefei</option>
+            <option value="Hegang">Hegang</option>
+            <option value="Heihe">Heihe</option>
+            <option value="Hengshui">Hengshui</option>
+            <option value="Hengyang">Hengyang</option>
+            <option value="Heyuan">Heyuan</option>
+            <option value="Heze">Heze</option>
+            <option value="Hezhou">Hezhou</option>
+            <option value="Hinggan">Hinggan</option>
+            <option value="Hohhot">Hohhot</option>
+            <option value="Hotan">Hotan</option>
+            <option value="Huaian">Huaian</option>
+            <option value="Huaibei">Huaibei</option>
+            <option value="Huaihua">Huaihua</option>
+            <option value="Huainan">Huainan</option>
+            <option value="Huanggang">Huanggang</option>
+            <option value="Huangshan">Huangshan</option>
+            <option value="Huangshi">Huangshi</option>
+            <option value="Huizhou">Huizhou</option>
+            <option value="Huludao">Huludao</option>
+            <option value="Hulun Buir">Hulun Buir</option>
+            <option value="Huzhou">Huzhou</option>
+            <option value="Ili">Ili</option>
+            <option value="Ji'an">Ji'an</option>
+            <option value="Jiamusi">Jiamusi</option>
+            <option value="Jiangmen">Jiangmen</option>
+            <option value="Jiaozuo">Jiaozuo</option>
+            <option value="Jiaxing">Jiaxing</option>
+            <option value="Jiayuguan">Jiayuguan</option>
+            <option value="Jieyang">Jieyang</option>
+            <option value="Jilin">Jilin</option>
+            <option value="Jinan">Jinan</option>
+            <option value="Jinchang">Jinchang</option>
+            <option value="Jincheng">Jincheng</option>
+            <option value="Jingdezhen">Jingdezhen</option>
+            <option value="Jingmen">Jingmen</option>
+            <option value="Jingzhou">Jingzhou</option>
+            <option value="Jinhua">Jinhua</option>
+            <option value="Jining">Jining</option>
+            <option value="Jinzhong">Jinzhong</option>
+            <option value="Jinzhou">Jinzhou</option>
+            <option value="Jiujiang">Jiujiang</option>
+            <option value="Jiuquan">Jiuquan</option>
+            <option value="Jixi">Jixi</option>
+            <option value="Kaifeng">Kaifeng</option>
+            <option value="Kaxgar">Kaxgar</option>
+            <option value="Kumul">Kumul</option>
+            <option value="Kunming">Kunming</option>
+            <option value="Laibin">Laibin</option>
+            <option value="Laiwu">Laiwu</option>
+            <option value="Langfang">Langfang</option>
+            <option value="Lanzhou">Lanzhou</option>
+            <option value="Leshan">Leshan</option>
+            <option value="Lhasa">Lhasa</option>
+            <option value="Liangshan">Liangshan</option>
+            <option value="Lianyungang">Lianyungang</option>
+            <option value="Liaocheng">Liaocheng</option>
+            <option value="Liaoyang">Liaoyang</option>
+            <option value="Liaoyuan">Liaoyuan</option>
+            <option value="Lijiang">Lijiang</option>
+            <option value="Lincang">Lincang</option>
+            <option value="Linfen">Linfen</option>
+            <option value="Linxia">Linxia</option>
+            <option value="Linyi">Linyi</option>
+            <option value="Lishui">Lishui</option>
+            <option value="Liupanshui">Liupanshui</option>
+            <option value="Liuzhou">Liuzhou</option>
+            <option value="Longnan">Longnan</option>
+            <option value="Longyan">Longyan</option>
+            <option value="Loudi">Loudi</option>
+            <option value="Luan">Luan</option>
+            <option value="Luohe">Luohe</option>
+            <option value="Luoyang">Luoyang</option>
+            <option value="Luzhou">Luzhou</option>
+            <option value="Lvliang">Lvliang</option>
+            <option value="Maanshan">Maanshan</option>
+            <option value="Maoming">Maoming</option>
+            <option value="Meishan">Meishan</option>
+            <option value="Meizhou">Meizhou</option>
+            <option value="Mianyang">Mianyang</option>
+            <option value="Mudanjiang">Mudanjiang</option>
+            <option value="Nanchang">Nanchang</option>
+            <option value="Nanchong">Nanchong</option>
+            <option value="Nanjing">Nanjing</option>
+            <option value="Nanning">Nanning</option>
+            <option value="Nanping">Nanping</option>
+            <option value="Nantong">Nantong</option>
+            <option value="Nanyang">Nanyang</option>
+            <option value="Neijiang">Neijiang</option>
+            <option value="Ningbo">Ningbo</option>
+            <option value="Ningde">Ningde</option>
+            <option value="Ordos">Ordos</option>
+            <option value="Panjin">Panjin</option>
+            <option value="Panzhihua">Panzhihua</option>
+            <option value="Pingdingshan">Pingdingshan</option>
+            <option value="Pingliang">Pingliang</option>
+            <option value="Pingxiang">Pingxiang</option>
+            <option value="Pu'er">Pu'er</option>
+            <option value="Putian">Putian</option>
+            <option value="Puyang">Puyang</option>
+            <option value="Qiandongnan">Qiandongnan</option>
+            <option value="Qiannan">Qiannan</option>
+            <option value="Qianxinan">Qianxinan</option>
+            <option value="Qingdao">Qingdao</option>
+            <option value="Qingyang">Qingyang</option>
+            <option value="Qingyuan">Qingyuan</option>
+            <option value="Qinhuangdao">Qinhuangdao</option>
+            <option value="Qinzhou">Qinzhou</option>
+            <option value="Qiqihar">Qiqihar</option>
+            <option value="Qitaihe">Qitaihe</option>
+            <option value="Qoqek">Qoqek</option>
+            <option value="Quanzhou">Quanzhou</option>
+            <option value="Qujing">Qujing</option>
+            <option value="Quzhou">Quzhou</option>
+            <option value="Rizhao">Rizhao</option>
+            <option value="Sanmenxia">Sanmenxia</option>
+            <option value="Sanming">Sanming</option>
+            <option value="Sanya">Sanya</option>
+            <option value="Shanghai">Shanghai</option>
+            <option value="Shangluo">Shangluo</option>
+            <option value="Shangqiu">Shangqiu</option>
+            <option value="Shangrao">Shangrao</option>
+            <option value="Shantou">Shantou</option>
+            <option value="Shanwei">Shanwei</option>
+            <option value="Shaoguan">Shaoguan</option>
+            <option value="Shaoxing">Shaoxing</option>
+            <option value="Shaoyang">Shaoyang</option>
+            <option value="Shenyang">Shenyang</option>
+            <option value="Shenzhen">Shenzhen</option>
+            <option value="Shijiazhuang">Shijiazhuang</option>
+            <option value="Shiyan">Shiyan</option>
+            <option value="Shizuishan">Shizuishan</option>
+            <option value="Shuangyashan">Shuangyashan</option>
+            <option value="Shuozhou">Shuozhou</option>
+            <option value="Siping">Siping</option>
+            <option value="Sipsongpanna">Sipsongpanna</option>
+            <option value="Songyuan">Songyuan</option>
+            <option value="Suihua">Suihua</option>
+            <option value="Suining">Suining</option>
+            <option value="Suizhou">Suizhou</option>
+            <option value="Suqian">Suqian</option>
+            <option value="Suzhou">Suzhou</option>
+            <option value="Tai'an">Tai'an</option>
+            <option value="Taiyuan">Taiyuan</option>
+            <option value="Taizhou">Taizhou</option>
+            <option value="taizhou">taizhou</option>
+            <option value="Tangshan">Tangshan</option>
+            <option value="Tianjin">Tianjin</option>
+            <option value="Tianshui">Tianshui</option>
+            <option value="Tieling">Tieling</option>
+            <option value="Tongchuan">Tongchuan</option>
+            <option value="Tonghua">Tonghua</option>
+            <option value="Tongliao">Tongliao</option>
+            <option value="Tongling">Tongling</option>
+            <option value="Tongren">Tongren</option>
+            <option value="Turpan">Turpan</option>
+            <option value="Ulanqab">Ulanqab</option>
+            <option value="Urumqi">Urumqi</option>
+            <option value="Weifang">Weifang</option>
+            <option value="Weihai">Weihai</option>
+            <option value="Weinan">Weinan</option>
+            <option value="Wenshan">Wenshan</option>
+            <option value="Wenzhou">Wenzhou</option>
+            <option value="Wuhai">Wuhai</option>
+            <option value="Wuhan">Wuhan</option>
+            <option value="Wuhu">Wuhu</option>
+            <option value="Wuwei">Wuwei</option>
+            <option value="Wuxi">Wuxi</option>
+            <option value="Wuzhong">Wuzhong</option>
+            <option value="Wuzhou">Wuzhou</option>
+            <option value="Xi'an">Xi'an</option>
+            <option value="Xiamen">Xiamen</option>
+            <option value="Xiangfan">Xiangfan</option>
+            <option value="Xiangtan">Xiangtan</option>
+            <option value="Xiangxi">Xiangxi</option>
+            <option value="Xianning">Xianning</option>
+            <option value="Xianyang">Xianyang</option>
+            <option value="Xiaogan">Xiaogan</option>
+            <option value="Xilin Gol">Xilin Gol</option>
+            <option value="Xingtai">Xingtai</option>
+            <option value="Xining">Xining</option>
+            <option value="Xinxiang">Xinxiang</option>
+            <option value="Xinyang">Xinyang</option>
+            <option value="Xinyu">Xinyu</option>
+            <option value="Xinzhou">Xinzhou</option>
+            <option value="Xuancheng">Xuancheng</option>
+            <option value="Xuchang">Xuchang</option>
+            <option value="Xuzhou">Xuzhou</option>
+            <option value="Ya'an">Ya'an</option>
+            <option value="Yan'an">Yan'an</option>
+            <option value="Yanbian">Yanbian</option>
+            <option value="Yancheng">Yancheng</option>
+            <option value="Yangjiang">Yangjiang</option>
+            <option value="Yangquan">Yangquan</option>
+            <option value="Yangzhou">Yangzhou</option>
+            <option value="Yantai">Yantai</option>
+            <option value="Yibin">Yibin</option>
+            <option value="Yichang">Yichang</option>
+            <option value="Yichun">Yichun</option>
+            <option value="yichun">yichun</option>
+            <option value="Yinchuan">Yinchuan</option>
+            <option value="Yingkou">Yingkou</option>
+            <option value="Yingtan">Yingtan</option>
+            <option value="Yiyang">Yiyang</option>
+            <option value="Yongzhou">Yongzhou</option>
+            <option value="Yueyang">Yueyang</option>
+            <option value="yulin">yulin</option>
+            <option value="Yulin">Yulin</option>
+            <option value="Yuncheng">Yuncheng</option>
+            <option value="Yunfu">Yunfu</option>
+            <option value="Yushu">Yushu</option>
+            <option value="Yuxi">Yuxi</option>
+            <option value="Zaozhuang">Zaozhuang</option>
+            <option value="Zhangjiajie">Zhangjiajie</option>
+            <option value="Zhangjiakou">Zhangjiakou</option>
+            <option value="Zhangye">Zhangye</option>
+            <option value="Zhangzhou">Zhangzhou</option>
+            <option value="Zhanjiang">Zhanjiang</option>
+            <option value="Zhaoqing">Zhaoqing</option>
+            <option value="Zhaotong">Zhaotong</option>
+            <option value="Zhengzhou">Zhengzhou</option>
+            <option value="Zhenjiang">Zhenjiang</option>
+            <option value="Zhongshan">Zhongshan</option>
+            <option value="Zhongwei">Zhongwei</option>
+            <option value="Zhoukou">Zhoukou</option>
+            <option value="Zhoushan">Zhoushan</option>
+            <option value="Zhuhai">Zhuhai</option>
+            <option value="Zhumadian">Zhumadian</option>
+            <option value="Zhuzhou">Zhuzhou</option>
+            <option value="Zibo">Zibo</option>
+            <option value="Zigong">Zigong</option>
+            <option value="Ziyang">Ziyang</option>
+            <option value="Zunyi">Zunyi</option>
+            <option value="Jiaozhou">Jiaozhou</option>
+            <option value="Aba">Aba</option>
+            <option value="Altay">Altay</option>
+            <option value="Dehong">Dehong</option>
+            <option value="Deqen">Deqen</option>
+            <option value="Garze">Garze</option>
+            <option value="Haixi">Haixi</option>
+            <option value="Honghe">Honghe</option>
+            <option value="Karamay">Karamay</option>
+            <option value="suzhou">suzhou</option>
+            <option value="Wuzhishan">Wuzhishan</option>
+            <option value="Qinghai">Qinghai</option>
+            <option value="Danzhou">Danzhou</option>
+            <option value="Wenchang">Wenchang</option>
+            <option value="Wannig">Wannig</option>
+            <option value="Dongfang">Dongfang</option>
+            <option value="Chengman">Chengman</option>
+            <option value="Anding">Anding</option>
+            <option value="Tunchang">Tunchang</option>
+            <option value="Lingao">Lingao</option>
+            <option value="Renqiu">Renqiu</option>
+            <option value="Alashanmeng">Alashanmeng</option>
+            <option value="Jiyuan">Jiyuan</option>
+            <option value="Xiangyang">Xiangyang</option>
+            <option value="Xiantao">Xiantao</option>
+            <option value="Tianmen">Tianmen</option>
+            <option value="Qianjiang">Qianjiang</option>
+            <option value="Shennongjia">Shennongjia</option>
+            <option value="Simao">Simao</option>
+          </select>
+        </div>
+      </div>
+ 
+      <div class="row-fluid">
+        <div class="col-md-7">
           <div class="demo-container">
             <div id="placeholder" class="demo-placeholder"></div>
           </div>
-       
+         </div>
+        <div class="col-md-5">
           <div class="demo-container">
             <div id="hourplaceholder" class="demo-placeholder"></div>
           </div>
-
-       
-
-      <div class="row">
-        <div class="span8">
          </div>
-        <div class="span4">
-         </div>
+      </div>  
+
+      <div class="row-fluid">
+        <div class="col-md-12">
+          <!-- timeline begin -->         
+            <div class="summary-table" style=" ">
+             <div class="timeline-chart">
+                <div class="chart-col w80">
+                  <div class="summary-content">
+                    <div class="chart-header clearfix">
+                      <span class="timeline-title " id="date_header">Hourly Impression</span>
+                    </div>
+                    <div class="chart-info clearfix x-mr10">
+                      <div class="chart-word">
+                        <div class="chart-word-timeline">
+                          <div class="timeline" id="tl">
+                            
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>                    
+                <div class="chart-col w20">
+                    <div class="summary-content">
+                      <div class="chart-header clearfix">
+                        <span class="timeline-title " id="date_header">Daily Summary</span>
+                        <span class="timeline-sub-title">(2016-1-09)</span>
+                      </div>
+                      <div class="chart-info clearfix x-mt10">
+                        <div class="chart-word ">
+                          <div class="chart-word-timeline">
+                            <ul class="timeline-summary clearfix">
+                              <li>
+                                <span class="timeline-name">Impressions</span>
+                                <span class="timeline-sum word-impr" id="impsCount"></span>
+                              </li>
+                              <li>
+                                <span class="timeline-name">Clicks</span>
+                                <span class="timeline-sum word-clicks" id="clicksCount"></span>
+                              </li>
+
+                            </ul>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                </div>
+             </div>
+            </div>
+          <!-- timeline end -->
+        </div>
       </div>
-  
-      <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from Evan Sue</p>
+      
+      <div class="row-fluid">
+        <div class="col-md-12">
+          <div class="footer">
+            <p><span class="glyphicon glyphicon-heart"></span> from Evan Sue</p>
+          </div>
+        </div>
       </div>
     </div>
     
-
 
 <br />
 
@@ -60,6 +483,8 @@
     <!-- bower:js -->
     <script src="/bower_components/jquery/dist/jquery.js"></script>
     <script src="/bower_components/Flot/jquery.flot.js"></script>
+    <script src="/bower_components/chosen-bower/chosen.jquery.js"></script>
+    <script src="/bower_components/lodash/lodash.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -67,6 +492,5 @@
     <script src="scripts/main.js"></script>
     <!-- endbuild -->
 
-   
   </body>
 </html>
