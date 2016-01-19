@@ -131,11 +131,11 @@ $(function() {
     var a1 = [],a2 = [], a3 = [];
     var l = 60 - bs + (em - bm - 1) * 60 + es + 1
     if(totalData.length != 0 ){
-      for(var i=bs;i<60;i++){ a1.push(formatMin(totalData[bm]["index"]) + ":" + i.toString()) }
+      for(var i=bs;i<60;i++){ a1.push(formatMin(totalData[bm]["index"]) + ":" + pad(i,2)) }
       for(var m=bm;m<em-1;m++){
-        for(var j=0;j<60;j++){ a2.push(formatMin(totalData[m]["index"]) + ":" + j.toString() )}   
+        for(var j=0;j<60;j++){ a2.push(formatMin(totalData[m]["index"]) + ":" + pad(j,2) )}   
       }
-      for(i=0;i<=es;i++){ a3.push(formatMin(totalData[em]["index"]) + ":" +  i.toString())  }
+      for(i=0;i<=es;i++){ a3.push(formatMin(totalData[em]["index"]) + ":" + pad(i,2)  )  }
     }   
     realTimeBox = a1.concat(a2).concat(a3);
     return l
