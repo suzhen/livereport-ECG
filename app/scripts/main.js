@@ -74,6 +74,15 @@ $(function() {
     });
   }
 
+  function pad(num, n) {
+    var len = num.toString().length;
+    while(len < n) {
+        num = "0" + num;
+        len++;
+    }
+    return num;
+  }
+
   function checkupSameData(data) {
     if($.inArray(data['index'], totalDataIndex)==-1){
       totalData.push(data)
@@ -115,7 +124,7 @@ $(function() {
   }
 
   function formatMin(min){
-    return Math.floor((min/60)).toString() + ":" + (min%60).toString()
+    return Math.floor((min/60)).toString() + ":" + pad((min%60),2)
   }
 
   function createRollTimeBox(bm,bs,em,es) {
