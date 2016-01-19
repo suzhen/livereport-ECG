@@ -5,11 +5,13 @@ $(function() {
 
   var totalPoints = 60, defaultYaxes = 5; //make sure not less 60
 
-  var totalData = [],totalDataIndex = []
+  var totalData = [],totalDataIndex = [],realTimeBox = [], lastHourTimeBox = []
 
   var fetchInterval = 1000*30;
 
   var updateInterval = 1000;
+
+  var liveUrl = 'http://xapi.optimix.asia'
 
   $('.chosen-select').chosen();
 
@@ -41,23 +43,26 @@ $(function() {
   function getClicksAndImps(){
     $.ajax({
       dataType: 'json',
-      url: 'http://eom.optimix.asia/Report/realtimeImpClick/'+campaignId+'/'+adGroupId+'/V2',
+      url: liveUrl + '/Report/realtimeImpClick/'+campaignId+'/'+adGroupId+'/V2',
       type: 'GET',
       success: function(data){
         if(data != null){
           data['effect'] = [];
-          for(var i=0;i<5;i++){
+          for(var i=0;i<5;i++){ //5 mins
             var imp_count = Array(60).fill(0);
             var clicks_count = Array(60).fill(0);
             data['effect'][i] = {}
             $.each(region, function(index, value) {
-              data[value][i]['imps'] = eval(data[value][i]['imps'])
-              data[value][i]['clicks'] = eval(data[value][i]['clicks'])
-              for(var j=0;j<60;j++){ imp_count[j] += data[value][i]['imps'][j]; clicks_count[j] += data[value][i]['clicks'][j];  }
+              data[value][i]['imps'] = eval(data[value][i]['imps']);
+              data[value][i]['clicks'] = eval(data[value][i]['clicks']);
+              for(var j=0;j<60;j++){ 
+                imp_count[j] += data[value][i]['imps'][j]; 
+                clicks_count[j] += data[value][i]['clicks'][j]; 
+              }
             });
             data['effect'][i]['imps'] = imp_count;
             data['effect'][i]['clicks'] = clicks_count;
-            data['effect'][i]['index'] = data['all'][i]['index']
+            data['effect'][i]['index'] = data['all'][i]['index'];
             //console.log(data)
             checkupSameData($.extend(true, {}, data['effect'][i]))
           }
@@ -109,9 +114,28 @@ $(function() {
     return []
   }
 
+  function formatMin(min){
+    return Math.floor((min/60)).toString() + ":" + (min%60).toString()
+  }
+
+  function createRollTimeBox(bm,bs,em,es) {
+    var a1 = [],a2 = [], a3 = [];
+    var l = 60 - bs + (em - bm - 1) * 60 + es + 1
+    if(totalData.length != 0 ){
+      for(var i=bs;i<60;i++){ a1.push(formatMin(totalData[bm]["index"]) + ":" + i.toString()) }
+      for(var m=bm;m<em-1;m++){
+        for(var j=0;j<60;j++){ a2.push(formatMin(totalData[m]["index"]) + ":" + j.toString() )}   
+      }
+      for(i=0;i<=es;i++){ a3.push(formatMin(totalData[em]["index"]) + ":" +  i.toString())  }
+    }   
+    realTimeBox = a1.concat(a2).concat(a3);
+    return l
+  }
+
   function getSerialData(index){     
     var scope = calculateScope(index);
     var data = sliceData(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);
+    createRollTimeBox(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']) 
     return formatData(data,totalPoints) 
   }
 
@@ -143,10 +167,11 @@ $(function() {
           'max_clicksData':formatMaxData(max_clicksData)}
   }
 
-  function showInfo(item){
+  function showInfo(item,id){
     if (item) {
-      var y = fNumber(item.datapoint[1]);  //,x = item.datapoint[0]
-      $('#tooltip').html(y + ' ' + item.series.label)
+      var y = fNumber(item.datapoint[1]);  var x = item.datapoint[0];
+      var ht = id == 'placeholder' ? realTimeBox[x] : lastHourTimeBox[x]
+      $('#tooltip').html(ht + '<br/>' + y + ' ' + item.series.label)
         .css({top: item.pageY+5, left: item.pageX+5})
         .fadeIn(200);
     } else {
@@ -188,7 +213,7 @@ $(function() {
   }).appendTo('body');
 
   $('#placeholder').bind('plothover', function (event, pos, item) {
-    showInfo(item)
+    showInfo(item,$(this).attr('id'))
   })
 
   var series = 0 
@@ -223,7 +248,7 @@ $(function() {
   function getLastHourClicksAndImps(){
     $.ajax({
       dataType: 'json',
-      url: 'http://eom.optimix.asia/Report/realtimeMinutes/'+campaignId+'/'+adGroupId,
+      url: liveUrl + '/Report/realtimeMinutes/'+campaignId+'/'+adGroupId,
       type: 'GET',
       success: function(data){       
         data['effect'] = {};
@@ -235,7 +260,8 @@ $(function() {
         });
         data['effect']['imps'] = imp_count;
         data['effect']['clicks'] = clicks_count;
-        data['effect']['index'] = data['all']['index'];
+        lastHourTimeBox = []
+        for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(parseInt(data['all']['index'])+i))}
         var ret = getHourSerialData($.extend(true, {}, data['effect']));
         var hourplot = $.plot('#hourplaceholder',[ret['impsData']], { 
           series: {
@@ -261,7 +287,7 @@ $(function() {
         });
         hourplot;
         $('#hourplaceholder').bind('plothover', function (event, pos, item) {
-          showInfo(item)
+          showInfo(item,$(this).attr('id'))
         })
       },
       error: function(e){
@@ -279,7 +305,7 @@ $(function() {
   function getLastDayClicksAndImps(){
     $.ajax({
       dataType: 'json',
-      url: 'http://eom.optimix.asia/Report/realtimeHours/'+campaignId+'/'+adGroupId,
+      url: liveUrl + '/Report/realtimeHours/'+campaignId+'/'+adGroupId,
       type: 'GET',
       success: function(data){   
         var hourcount =  data['all']['imps'].length;
@@ -296,7 +322,7 @@ $(function() {
         data['effect']['clicks_count'] = eval(clicks_count.join('+'));
         var timelineHTML = ''
         for(var i=0;i<data['effect']['imps'].length;i++){
-          timelineHTML += '<span class=\'tl_dot tl_dot_'+(i+1)+' '+(i%7 == 0 ? 'on' : '')+'\'>'+
+          timelineHTML += '<span class=\'tl_dot tl_dot_'+(i+1)+' '+(i%6 == 0 ? 'on' : '')+'\'>'+
                           '<div class=\'arrow_box '+ (i%2 == 0 ? 'bottom' : 'top') +'\'>' +
                             '<ul>' +
                               '<li><span style=\'color:red;\'>'+(i+1)+':00</span></li>' +
