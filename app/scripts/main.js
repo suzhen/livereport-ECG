@@ -3,7 +3,7 @@ $(function() {
 
   var impsLabel = 'impressions', clicksLabel = 'clicks';
 
-  var totalPoints = 60, defaultYaxes = 5; //make sure not less 60
+  var step = 3, totalPoints = 25, defaultYaxes = 50; //make sure not less 60/step
 
   var totalData = [],totalDataIndex = [],realTimeBox = [];
 
@@ -11,7 +11,7 @@ $(function() {
 
   var fetchInterval = 1000*30;
 
-  var updateInterval = 1000;
+  var updateInterval = 1000*step;
 
   var lastHourUpdateInterval = 1000*60;
 
@@ -64,6 +64,10 @@ $(function() {
                 clicks_count[j] += data[value][i]['clicks'][j]; 
               }
             });
+            imp_count = _.chunk(imp_count, step);
+            clicks_count = _.chunk(clicks_count, step);
+            imp_count = _.map(imp_count,function(n){ var sum = n.join('+'); return eval('('+sum+')') })
+            clicks_count = _.map(clicks_count,function(n){ var sum = n.join('+'); return eval('('+sum+')') })       
             data['effect'][i]['imps'] = imp_count;
             data['effect'][i]['clicks'] = clicks_count;
             data['effect'][i]['index'] = data['all'][i]['index'];
@@ -102,24 +106,26 @@ $(function() {
   function formatMaxData(max){ return Math.ceil(max/5)*5 }
 
   function calculateScope(index){
-    var _end_index = (index+totalPoints)/60
-    var _end_mod = (index+totalPoints)%60  
-    return {'begin_min':Math.floor(index/60),
-          'begin_sec':index%60,
+    var space = 60/step
+    var _end_index = (index+totalPoints)/space
+    var _end_mod = (index+totalPoints)%space
+    return {'begin_min':Math.floor(index/space),
+          'begin_sec':index%space,
           'end_min':_end_mod == 0 ? _end_index -1 : Math.floor(_end_index),
-          'end_sec':_end_mod == 0 ? 59 :  _end_mod - 1}   
+          'end_sec':_end_mod == 0 ? space-1 :  _end_mod - 1}   
   } 
 
   function sliceData(begin_min,begin_sec,end_min,end_sec){
-    var _impsData = [], _clicksData = []
+    var _impsData = [], _clicksData = [];
+    var space = 60/step;
     if(!$.isEmptyObject(totalData)&&!$.isEmptyObject(totalData[begin_min])&&!$.isEmptyObject(totalData[end_min])){      
       for(var i=begin_min;i<=end_min;i++){      
         if(i == begin_min){
-          for(var j=begin_sec;j<60;j++){ _impsData.push(totalData[i]['imps'][j]);_clicksData.push(totalData[i]['clicks'][j]) }
+          for(var j=begin_sec;j<space;j++){ _impsData.push(totalData[i]['imps'][j]);_clicksData.push(totalData[i]['clicks'][j]) }
         }else if(i == end_min){
           for( j=0;j<=end_sec;j++){ _impsData.push(totalData[i]['imps'][j]);_clicksData.push(totalData[i]['clicks'][j]) }
         }else{
-          for( j=0;j<60;j++){ _impsData.push(totalData[i]['imps'][j]);_clicksData.push(totalData[i]['clicks'][j]) }
+          for( j=0;j<space;j++){ _impsData.push(totalData[i]['imps'][j]);_clicksData.push(totalData[i]['clicks'][j]) }
         }                  
       }
       return [_impsData,_clicksData]
@@ -133,22 +139,28 @@ $(function() {
 
   function createRollTimeBox(bm,bs,em,es) {
     var a1 = [],a2 = [], a3 = [];
-    var l = 60 - bs + (em - bm - 1) * 60 + es + 1
+    var space = 60/step;
     if(totalData.length != 0 ){
-      for(var i=bs;i<60;i++){ a1.push(formatMin(totalData[bm]["index"]) + ":" + pad(i,2)) }
-      for(var m=bm;m<em-1;m++){
-        for(var j=0;j<60;j++){ a2.push(formatMin(totalData[m]["index"]) + ":" + pad(j,2) )}   
+      for(var i=bs;i<space;i++){ 
+        a1.push(formatMin(totalData[bm]["index"]) + ":" + pad(i,2))
       }
-      for(i=0;i<=es;i++){ a3.push(formatMin(totalData[em]["index"]) + ":" + pad(i,2)  )  }
+      for(var m=bm;m<em-1;m++){
+        for(var j=0;j<space;j++){ 
+          a2.push(formatMin(totalData[m]["index"]) + ":" + pad(j,2))
+        }   
+      }
+      for(i=0;i<=es;i++){ 
+        a3.push(formatMin(totalData[em]["index"]) + ":" + pad(i,2))
+      }
     }   
     realTimeBox = a1.concat(a2).concat(a3);
-    return l
   }
 
   function getSerialData(index){     
     var scope = calculateScope(index);
     var data = sliceData(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);
-    createRollTimeBox(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']) 
+    createRollTimeBox(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);   
+    console.log(realTimeBox)
     return formatData(data,totalPoints,'roll') 
   }
 
@@ -189,7 +201,7 @@ $(function() {
       if(type=="lastHour"){
         var today = new Date(); var cDay = new Date();
         var y = today.getFullYear() , m = today.getMonth(); var d = today.getDate()
-        for(var i=0;i<60;i++){
+        for(var i=0;i<length;i++){
           cDay = new Date(y,m,d,0,0+i);minTimeline.push(cDay.getTime());
         }
       }
