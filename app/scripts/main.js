@@ -5,11 +5,15 @@ $(function() {
 
   var totalPoints = 60, defaultYaxes = 5; //make sure not less 60
 
-  var totalData = [],totalDataIndex = [],realTimeBox = [], lastHourTimeBox = []
+  var totalData = [],totalDataIndex = [],realTimeBox = [];
+
+  var lastHourData = null, lastHourTimeBox = [],minTimeline = [];
 
   var fetchInterval = 1000*30;
 
   var updateInterval = 1000;
+
+  var lastHourUpdateInterval = 1000*60;
 
   var liveUrl = 'http://xapi.optimix.asia'
 
@@ -85,8 +89,8 @@ $(function() {
 
   function checkupSameData(data) {
     if($.inArray(data['index'], totalDataIndex)==-1){
-      totalData.push(data)
-      totalDataIndex.push(data['index'])
+      totalData.push(data);
+      totalDataIndex.push(data['index']);
     }
   }
 
@@ -145,7 +149,7 @@ $(function() {
     var scope = calculateScope(index);
     var data = sliceData(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);
     createRollTimeBox(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']) 
-    return formatData(data,totalPoints) 
+    return formatData(data,totalPoints,'roll') 
   }
 
   function fNumber(num){    
@@ -159,27 +163,50 @@ $(function() {
     return result.join('');
   }    
 
-  function formatData(data,length){
-    var max_impsData = 0 , max_clicksData = 0 , impsData = [] , clicksData = []
+  function formatData(data,length,type){
+    var max_impsData = 0 , max_clicksData = 0 , impsData = [] , clicksData = [];
+    function rollPoint(index){
+      impsData[index] = [index,data[0][index] === undefined ? 0 : data[0][index]]; 
+      clicksData[index] = [index,data[1][index] === undefined ? 0 : data[1][index]];
+    }
+    function initRollPoint(index){
+      impsData[index] = [index,0]; clicksData[index] = [index,0];
+    }
+    function lastHourPoint(index){
+      impsData[index] = [minTimeline[index],data[0][index] === undefined ? 0 : data[0][index]]; 
+      clicksData[index] = [minTimeline[index],data[1][index] === undefined ? 0 : data[1][index]];    
+    }
+    function initLastHourPoint(index){    
+      impsData[index] = [minTimeline[index],0]; 
+      clicksData[index] = [minTimeline[index],0];  
+    }
     if(data.length!=0){
-      for(var i=0;i < length;i++ ){
-        impsData[i] = [i,data[0][i] === undefined ? 0 : data[0][i]]; 
-        clicksData[i] = [i,data[1][i] === undefined ? 0 : data[1][i]];
+      for(var i=0;i < length;i++ ){     
+        type == "roll" ? rollPoint(i) : lastHourPoint(i)
       }
       max_impsData = Math.max(...data[0]); max_clicksData = Math.max(...data[1]);    
     }else{
-      for(i=0;i < length;i++ ){impsData[i] = [i,0]; clicksData[i] = [i,0];}    
+      if(type=="lastHour"){
+        var today = new Date(); var cDay = new Date();
+        var y = today.getFullYear() , m = today.getMonth(); var d = today.getDate()
+        for(var i=0;i<60;i++){
+          cDay = new Date(y,m,d,0,0+i);minTimeline.push(cDay.getTime());
+        }
+      }
+      for(i=0;i < length;i++ ){
+        type == "roll" ? initRollPoint(i) : initLastHourPoint(i)
+      }    
     }
     return {'impsData':{data:impsData,label:impsLabel},
-          'clicksData':{data:clicksData,label:clicksLabel},
-          'max_impsData':formatMaxData(max_impsData),
-          'max_clicksData':formatMaxData(max_clicksData)}
+            'clicksData':{data:clicksData,label:clicksLabel},
+            'max_impsData':formatMaxData(max_impsData),
+            'max_clicksData':formatMaxData(max_clicksData)}
   }
 
   function showInfo(item,id){
     if (item) {
-      var y = fNumber(item.datapoint[1]);  var x = item.datapoint[0];
-      var ht = id == 'placeholder' ? realTimeBox[x] : lastHourTimeBox[x]
+      var y = fNumber(item.datapoint[1]);  var x = item.datapoint[0]; var z = item.dataIndex
+      var ht = id == 'placeholder' ? realTimeBox[x] : lastHourTimeBox[z]
       $('#tooltip').html(ht + '<br/>' + y + ' ' + item.series.label)
         .css({top: item.pageY+5, left: item.pageX+5})
         .fadeIn(200);
@@ -268,36 +295,59 @@ $(function() {
           for(var j=0;j<60;j++){ imp_count[j] += data[value]['imps'][j]; clicks_count[j] += data[value]['clicks'][j];  }
         });
         data['effect']['imps'] = imp_count;
-        data['effect']['clicks'] = clicks_count;
+        data['effect']['clicks'] = clicks_count;  
+        var begin_minutes = parseInt(data['all']['index'])
+        //create hover array 
         lastHourTimeBox = []
-        for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(parseInt(data['all']['index'])+i))}
-        var ret = getHourSerialData($.extend(true, {}, data['effect']));
-        var hourplot = $.plot('#hourplaceholder',[ret['impsData']], { 
-          series: {
-            lines: {
-              show: true
-            },
-            points: {
-              show: true
-            },
-            shadowSize: 0 // Drawing is faster without shadows
-          },
-          grid: {
-            hoverable: true,
-            borderColor: '#E2E6EE',
-            borderWidth: 1,
-            tickColor: '#E2E6EE'
-          },
-          colors: ['#e52a32'],
-          yaxis: {
-            min: 0,
-            max: ret['max_impsData']
-          }
-        });
-        hourplot;
+        for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(begin_minutes+i)) }  
+        //create xaxis array
+        minTimeline = []
+        var today = new Date(); var cDay = new Date();
+        var hm = lastHourTimeBox[0].split(':');
+        var hr = hm[0]; var min = hm[1];
+        var y = today.getFullYear(); var m = today.getMonth(); var d = (begin_minutes > 1380 ? today.getDate()-1 : today.getDate())
+        for(var i=0;i<60;i++){
+          cDay = new Date(y,m,d,hr,parseInt(min)+i);minTimeline.push(cDay.getTime());
+        }
+        lastHourData = $.extend(true, {}, data['effect'])
+
+        var scopeData = getHourSerialData();
+        // console.log(scopeData)
+
+        $.plot('#hourplaceholder',[scopeData['impsData']], { 
+                    series: {
+                      lines: {
+                        show: true
+                      },
+                      points: {
+                        show: true
+                      },
+                      shadowSize: 0 // Drawing is faster without shadows
+                    },
+                    grid: {
+                      hoverable: true,
+                      borderColor: '#E2E6EE',
+                      borderWidth: 1,
+                      tickColor: '#E2E6EE'
+                    },
+                    colors: ['#e52a32'],
+                    yaxis: {
+                      min: 0,
+                      max: scopeData['max_impsData']
+                    },
+                    xaxis: {
+                      mode: "time",
+                      timezone: "browser",
+                      // minTickSize: [1, "Minutes"],
+                      min: minTimeline[0][0],
+                      max: minTimeline[59][0]
+                    }
+                 });
+        
         $('#hourplaceholder').bind('plothover', function (event, pos, item) {
           showInfo(item,$(this).attr('id'))
         })
+
       },
       error: function(e){
         e
@@ -305,10 +355,26 @@ $(function() {
     });
   }
 
-  function getHourSerialData(data){
-    return formatData([data['imps'],data['clicks']],60)
+
+  function getHourSerialData(){
+    if(lastHourData==null){    
+      return formatData([],60,'lastHour')
+    }else{
+      return formatData([lastHourData['imps'],lastHourData['clicks']],60,'lastHour')
+    }
   }
 
+  function updateLastHour(){
+    if(campaignId!=0&&adGroupId!=0){
+      getLastHourClicksAndImps();
+    }  
+    setTimeout(updateLastHour, lastHourUpdateInterval);
+  }
+
+  updateLastHour();
+
+
+  
   //*********************************************************************//
 
   function getLastDayClicksAndImps(){
