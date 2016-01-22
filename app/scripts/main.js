@@ -142,15 +142,15 @@ $(function() {
     var space = 60/step;
     if(totalData.length != 0 ){
       for(var i=bs;i<space;i++){ 
-        a1.push(formatMin(totalData[bm]["index"]) + ":" + pad(i,2))
+        a1.push(formatMin(totalData[bm]["index"]) + ":" + pad(i*step,2))
       }
       for(var m=bm;m<em-1;m++){
         for(var j=0;j<space;j++){ 
-          a2.push(formatMin(totalData[m]["index"]) + ":" + pad(j,2))
+          a2.push(formatMin(totalData[m]["index"]) + ":" + pad(j*step,2))
         }   
       }
       for(i=0;i<=es;i++){ 
-        a3.push(formatMin(totalData[em]["index"]) + ":" + pad(i,2))
+        a3.push(formatMin(totalData[em]["index"]) + ":" + pad(i*step,2))
       }
     }   
     realTimeBox = a1.concat(a2).concat(a3);
@@ -160,7 +160,6 @@ $(function() {
     var scope = calculateScope(index);
     var data = sliceData(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);
     createRollTimeBox(scope['begin_min'],scope['begin_sec'],scope['end_min'],scope['end_sec']);   
-    console.log(realTimeBox)
     return formatData(data,totalPoints,'roll') 
   }
 
