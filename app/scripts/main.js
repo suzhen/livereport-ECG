@@ -3,7 +3,7 @@ $(function() {
 
   var impsLabel = 'impressions', clicksLabel = 'clicks';
 
-  var step = 3, totalPoints = 25, defaultYaxes = 50; //make sure not less 60/step
+  var step = 3, totalPoints = 25, defaultYaxes = 5; //make sure not less 60/step
 
   var totalData = [],totalDataIndex = [],realTimeBox = [];
 
@@ -103,7 +103,10 @@ $(function() {
     setTimeout(fetchData, fetchInterval);
   }
 
-  function formatMaxData(max){ return Math.ceil(max/5)*5 }
+  function formatMaxData(max){   
+    if(max<5){ return 5  }
+    return Math.ceil(max/5)*5 
+  }
 
   function calculateScope(index){
     var space = 60/step
@@ -263,7 +266,9 @@ $(function() {
     showInfo(item,$(this).attr('id'))
   })
 
-  var series = 0 
+  var series = 0; 
+
+  var topPoint = defaultYaxes;
 
   function update() {
 
@@ -271,13 +276,15 @@ $(function() {
 
     plot.setData([newScopeData['impsData']]);  //,newScopeData['clicksData']
 
-    if(newScopeData['max_impsData'] > defaultYaxes) {
+    console.log(newScopeData['max_impsData'])
 
-      defaultYaxes = newScopeData['max_impsData']
+    if(newScopeData['max_impsData'] != topPoint) {
 
-      plot.getOptions().yaxes[0].max = defaultYaxes
+      plot.getOptions().yaxes[0].max = newScopeData['max_impsData']
 
-      plot.setupGrid()
+      plot.setupGrid();
+
+      topPoint = newScopeData['max_impsData']
 
     } 
 
