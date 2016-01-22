@@ -276,15 +276,13 @@ $(function() {
 
     plot.setData([newScopeData['impsData']]);  //,newScopeData['clicksData']
 
-    console.log(newScopeData['max_impsData'])
-
     if(newScopeData['max_impsData'] != topPoint) {
 
       plot.getOptions().yaxes[0].max = newScopeData['max_impsData']
 
       plot.setupGrid();
 
-      topPoint = newScopeData['max_impsData']
+      topPoint = newScopeData['max_impsData'];
 
     } 
 
