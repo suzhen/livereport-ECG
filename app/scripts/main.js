@@ -9,6 +9,8 @@ $(function() {
 
   var lastHourData = null, lastHourTimeBox = [],minTimeline = [];
 
+  var twentyfourData = [];
+
   var fetchInterval = 1000*30;
 
   var updateInterval = 1000*step;
@@ -35,7 +37,7 @@ $(function() {
     }
     fetchData();
     getLastHourClicksAndImps();
-    getLastDayClicksAndImps();
+    getTodayClicksAndImpsByHour();
   }
 
   $('#citiesSelect').chosen().change(function(){
@@ -220,8 +222,15 @@ $(function() {
   function showInfo(item,id){
     if (item) {
       var y = fNumber(item.datapoint[1]);  var x = item.datapoint[0]; var z = item.dataIndex
-      var ht = id == 'placeholder' ? realTimeBox[x] : lastHourTimeBox[z]
-      $('#tooltip').html(ht + '<br/>' + y + ' ' + item.series.label)
+      var ht = '';
+      if(id == 'placeholder'){
+        ht = realTimeBox[x]
+      }else if(id == 'hourplaceholder'){
+        ht = lastHourTimeBox[z]
+      }else{
+        ht = x+":00"
+      }
+      $('#tooltip').html(ht + '<br/>' + item.series.label + ":" + ' ' + y)
         .css({top: item.pageY+5, left: item.pageX+5})
         .fadeIn(200);
     } else {
@@ -233,7 +242,7 @@ $(function() {
     series: {
       lines: {
         show: true,
-        fill: true
+        fill: false
       },
       points: {
         show: true
@@ -302,68 +311,69 @@ $(function() {
       dataType: 'json',
       url: liveUrl + '/Report/realtimeMinutes/'+campaignId+'/'+adGroupId,
       type: 'GET',
-      success: function(data){       
-        data['effect'] = {};
-        var imp_count = Array(60).fill(0);
-        var clicks_count = Array(60).fill(0);
-        $.each(region, function(index, value) {
-          data[value]['imps'] = eval(data[value]['imps']); data[value]['clicks'] = eval(data[value]['clicks']);
-          for(var j=0;j<60;j++){ imp_count[j] += data[value]['imps'][j]; clicks_count[j] += data[value]['clicks'][j];  }
-        });
-        data['effect']['imps'] = imp_count;
-        data['effect']['clicks'] = clicks_count;  
-        var begin_minutes = parseInt(data['all']['index'])
-        //create hover array 
-        lastHourTimeBox = []
-        for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(begin_minutes+i)) }  
-        //create xaxis array
-        minTimeline = []
-        var today = new Date(); var cDay = new Date();
-        var hm = lastHourTimeBox[0].split(':');
-        var hr = hm[0]; var min = hm[1];
-        var y = today.getFullYear(); var m = today.getMonth(); var d = (begin_minutes > 1380 ? today.getDate()-1 : today.getDate())
-        for(var i=0;i<60;i++){
-          cDay = new Date(y,m,d,hr,parseInt(min)+i);minTimeline.push(cDay.getTime());
+      success: function(data){   
+        if(!_.isNull(data)){
+          data['effect'] = {};
+          var imp_count = Array(60).fill(0);
+          var clicks_count = Array(60).fill(0);
+          $.each(region, function(index, value) {
+            data[value]['imps'] = eval(data[value]['imps']); data[value]['clicks'] = eval(data[value]['clicks']);
+            for(var j=0;j<60;j++){ imp_count[j] += data[value]['imps'][j]; clicks_count[j] += data[value]['clicks'][j];  }
+          });
+          data['effect']['imps'] = imp_count;
+          data['effect']['clicks'] = clicks_count;  
+          var begin_minutes = parseInt(data['all']['index'])
+          //create hover array 
+          lastHourTimeBox = []
+          for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(begin_minutes+i)) }  
+          //create xaxis array
+          minTimeline = []
+          var today = new Date(); var cDay = new Date();
+          var hm = lastHourTimeBox[0].split(':');
+          var hr = hm[0]; var min = hm[1];
+          var y = today.getFullYear(); var m = today.getMonth(); var d = (begin_minutes > 1380 ? today.getDate()-1 : today.getDate())
+          for(var i=0;i<60;i++){
+            cDay = new Date(y,m,d,hr,parseInt(min)+i);minTimeline.push(cDay.getTime());
+          }
+          lastHourData = $.extend(true, {}, data['effect'])
+
+          var scopeData = getHourSerialData();
+          // console.log(scopeData)
+
+          $.plot('#hourplaceholder',[scopeData['impsData']], { 
+                      series: {
+                        lines: {
+                          show: true
+                        },
+                        points: {
+                          show: true
+                        },
+                        shadowSize: 0 // Drawing is faster without shadows
+                      },
+                      grid: {
+                        hoverable: true,
+                        borderColor: '#E2E6EE',
+                        borderWidth: 1,
+                        tickColor: '#E2E6EE'
+                      },
+                      colors: ['#e52a32'],
+                      yaxis: {
+                        min: 0,
+                        max: scopeData['max_impsData']
+                      },
+                      xaxis: {
+                        mode: "time",
+                        timezone: "browser",
+                        // minTickSize: [1, "Minutes"],
+                        min: minTimeline[0][0],
+                        max: minTimeline[59][0]
+                      }
+                   });
+          
+          $('#hourplaceholder').bind('plothover', function (event, pos, item) {
+            showInfo(item,$(this).attr('id'))
+          })
         }
-        lastHourData = $.extend(true, {}, data['effect'])
-
-        var scopeData = getHourSerialData();
-        // console.log(scopeData)
-
-        $.plot('#hourplaceholder',[scopeData['impsData']], { 
-                    series: {
-                      lines: {
-                        show: true
-                      },
-                      points: {
-                        show: true
-                      },
-                      shadowSize: 0 // Drawing is faster without shadows
-                    },
-                    grid: {
-                      hoverable: true,
-                      borderColor: '#E2E6EE',
-                      borderWidth: 1,
-                      tickColor: '#E2E6EE'
-                    },
-                    colors: ['#e52a32'],
-                    yaxis: {
-                      min: 0,
-                      max: scopeData['max_impsData']
-                    },
-                    xaxis: {
-                      mode: "time",
-                      timezone: "browser",
-                      // minTickSize: [1, "Minutes"],
-                      min: minTimeline[0][0],
-                      max: minTimeline[59][0]
-                    }
-                 });
-        
-        $('#hourplaceholder').bind('plothover', function (event, pos, item) {
-          showInfo(item,$(this).attr('id'))
-        })
-
       },
       error: function(e){
         e
@@ -393,106 +403,147 @@ $(function() {
   
   //*********************************************************************//
 
-  function getLastDayClicksAndImps(){
+  function initTwentyFourPlot(){
+    for(var i=0;i<24;i++){
+      twentyfourData.push([i+1,0])
+    }
+    return twentyfourData
+  }
+
+  var twentyfourplot = $.plot('#twentyfourplaceholder',[initTwentyFourPlot()], {   //,getSerialData(0)['clicksData']
+    series: {
+      lines: {
+        show: true,
+        fill: true
+      },
+      points: {
+        show: true,
+        fill: true
+      },
+      shadowSize: 0 // Drawing is faster without shadows
+    },
+    grid: {
+      hoverable: true,
+      borderColor: '#E2E6EE',
+      borderWidth: 1,
+      tickColor: '#E2E6EE'
+    },
+    colors: ['#e52a32', '#336dc6'],
+    yaxis: {
+      max: defaultYaxes,
+      tickDecimals: 0
+    },
+    xaxis: {
+      minTickSize: 4,
+      tickDecimals: 0,
+      min: 1,
+      max: 24
+    },
+    legend: { position: "nw" } //southwest
+  });
+
+  $('#twentyfourplaceholder').bind('plothover', function (event, pos, item) {
+    showInfo(item,$(this).attr('id'))
+  })
+
+  function getStepSummation(arr){
+    for(var i=1;i<arr.length;i++){
+      arr[i] = arr[i-1] + arr[i]
+    }
+    return arr
+  }
+
+  function getTodayClicksAndImpsByHour(){
     $.ajax({
       dataType: 'json',
       url: liveUrl + '/Report/realtimeHours/'+campaignId+'/'+adGroupId,
       type: 'GET',
       success: function(data){   
-        var hourcount =  data['all']['imps'].length;
-        data['effect'] = {};
-        var imp_count = Array(hourcount).fill(0);
-        var clicks_count = Array(hourcount).fill(0);
-        $.each(region, function(index, value) {
-          data[value]['imps'] = eval(data[value]['imps']); data[value]['clicks'] = eval(data[value]['clicks']);
-          for(var j=0;j<hourcount;j++){ imp_count[j] += data[value]['imps'][j]; clicks_count[j] += data[value]['clicks'][j];  }
-        });
-        data['effect']['imps'] = imp_count;
-        data['effect']['clicks'] = clicks_count;
-        data['effect']['imps_count'] = eval(imp_count.join('+'));
-        data['effect']['clicks_count'] = eval(clicks_count.join('+'));
-        var timelineHTML = ''
-        for(var i=0;i<data['effect']['imps'].length;i++){
-          timelineHTML += '<span class=\'tl_dot tl_dot_'+(i+1)+' '+(i%6 == 0 ? 'on' : '')+'\'>'+
-                          '<div class=\'arrow_box '+ (i%2 == 0 ? 'bottom' : 'top') +'\'>' +
-                            '<ul>' +
-                              '<li><span style=\'color:red;\'>'+(i+1)+':00</span></li>' +
-                              '<li><span style=\'font-weight:bold;font-size:10px;\'>'+fNumber(data['effect']['imps'][i])+'</span></li>' +
-                            '</ul>' +
-                          '</div>' +
-                         '</span>'
+        if(!_.isNull(data)){
+          var hourcount =  data['all']['imps'].length;
+          data['effect'] = {};
+          var imp_count = Array(hourcount).fill(0);
+          var clicks_count = Array(hourcount).fill(0);
+          $.each(region, function(index, value) {
+            data[value]['imps'] = eval(data[value]['imps']); data[value]['clicks'] = eval(data[value]['clicks']);
+            for(var j=0;j<hourcount;j++){ imp_count[j] += data[value]['imps'][j]; clicks_count[j] += data[value]['clicks'][j];  }
+          });
+          data['effect']['imps'] = getStepSummation(imp_count);
+          data['effect']['clicks'] = getStepSummation(clicks_count);
+          formatTwentyFourData($.extend(true, {}, data['effect']),hourcount);
+          updateTwentyFourPlot();
         }
-
-        $('#tl').html(timelineHTML);
-        $('#impsCount').html(fNumber(data['effect']['imps_count']));
-        $('#clicksCount').html(fNumber(data['effect']['clicks_count']));
-
-        //****
-        $('.tl_dot').each(function(){
-          var tar = $(this).find('.arrow_box');
-          var isTop = tar.hasClass('top');
-          var isRightBox = tar.hasClass('rightBox');
-          var isLeftBox = tar.hasClass('leftBox');
-
-          // var top = -80; 
-          var widthOffset = ($(this).find('.arrow_box').width()+22-10);
-          var heightOffset = ($(this).find('.arrow_box').height()+24+30+5);
-          var timelineWidth = $('.timeline').width()*0.0434;
-          $(this).find('.arrow_box').css({top:0-heightOffset});
-          if(isTop){
-            $(this).find('.arrow_box').css({top:-8,left:-timelineWidth});
-          }
-          if (isRightBox) {
-            $(this).find('.arrow_box').css({top:0,left:0-widthOffset});
-          }
-          if (isLeftBox) {
-            $(this).find('.arrow_box').css({left:0-widthOffset+14});
-          }
-        })
-        var timeLine_Dot = {
-          init : function (){
-            // var _this = this;
-            this.bind();
-          },
-          bind : function(){
-            $(document).on('mouseenter','.tl_dot',function(){
-              var tar = $(this).find('.arrow_box');
-              var isTop = tar.hasClass('top');
-              var isRightBox = tar.hasClass('rightBox');
-              var isLeftBox = tar.hasClass('leftBox');
-              // var top = -80;
-              var widthOffset = ($(this).find('.arrow_box').width()+22-10);
-              var heightOffset = ($(this).find('.arrow_box').height()+24+30+5);
-              var timelineWidth = $('.timeline').width()*0.0434;
-              $(this).find('.arrow_box').css('z-index','9999999');
-              $(this).find('.arrow_box').css('border-color','red');
-              $(this).find('.arrow_box').addClass('hightlight_arr');
-              $(this).find('.arrow_box').css({top:0-heightOffset});
-              if(isTop){
-                $(this).find('.arrow_box').css({top:-8,left:-timelineWidth});
-              }
-              if (isRightBox) {
-                $(this).find('.arrow_box').css({top:0,left:0-widthOffset});
-              }
-              if (isLeftBox) {
-                $(this).find('.arrow_box').css({left:0-widthOffset+14});
-              }
-
-            })
-            $(document).on('mouseleave','.tl_dot',function(){
-              $(this).find('.arrow_box').css('z-index','99999');
-              $(this).find('.arrow_box').css('border-color','#ccc');
-              $(this).find('.arrow_box').removeClass('hightlight_arr');
-            })  
-          }
-        }
-        timeLine_Dot.init()
-        //****
       },
       error: function(e){
         e
       }
     });
   }
+
+  function formatTwentyFourData(data,length){
+    var max_impsData = 0 , max_clicksData = 0 , impsData = [] , clicksData = []; 
+    for(var j=1;j<=length;j++){
+     impsData.push([j, data['imps'][j-1]]);clicksData.push([j,data['clicks'][j-1]])
+    }
+    twentyfourData = {'impsData':{data:impsData,label:impsLabel},
+                      'clicksData':{data:clicksData,label:clicksLabel,yaxis: 2},
+                      'max_impsData':data['imps'][length-1],
+                      'max_clicksData':data['clicks'][length-1]}
+  }
+
+  function clicksFormatter(v, axis) {
+    return v.toFixed(axis.tickDecimals);
+  }
+
+  function updateTwentyFourPlot(){
+    $.plot('#twentyfourplaceholder',[twentyfourData['impsData']], {   //,,twentyfourData['clicksData']
+        series: {
+          lines: {
+            show: true,
+            fill: true
+          },
+          points: {
+            show: true,
+            fill: true
+          },
+          shadowSize: 0 // Drawing is faster without shadows
+        },
+        grid: {
+          hoverable: true,
+          borderColor: '#E2E6EE',
+          borderWidth: 1,
+          tickColor: '#E2E6EE'
+        },
+        colors: ['#e52a32', '#336dc6'],
+         yaxes: { min: 0 },
+        // yaxes: [ { min: 0 }, {
+        //   // align if we are to the right
+        //   alignTicksWithAxis: null,
+        //   position: 'right',
+        //   tickFormatter: clicksFormatter
+        // } ],
+        xaxis: {
+          minTickSize: 4,
+          tickDecimals: 0,
+          min: 1,
+          max: 24
+        },
+        legend: { position: "nw" } //southwest
+    });
+
+    // twentyfourplot.setData([twentyfourData['impsData'],twentyfourData['clicksData']]);  
+
+    // twentyfourplot.getOptions().yaxes[0].max = twentyfourData['max_impsData']
+
+    // twentyfourplot.getOptions().yaxes[1].max = twentyfourData['max_clicksData']
+
+    // twentyfourplot.setupGrid();
+
+    // twentyfourplot.draw();
+  }
+
+
+  
+
     
 });

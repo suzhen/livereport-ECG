@@ -16,7 +16,6 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/timeline.css">
     <!-- endbuild -->
   </head>
   <body>
@@ -39,11 +38,11 @@
           <form class="form-inline">
             <div class="form-group">
               <label for="campaignId">campaignId</label>
-              <input type="text" class="form-control" id="campaignId" placeholder="" value="16745">
+              <input type="text" class="form-control" id="campaignId" placeholder="" value="16633">
             </div>
             <div class="form-group">
               <label for="adGroupId">adGroupId</label>
-              <input type="text" class="form-control" id="adGroupId" placeholder="" value="5575">
+              <input type="text" class="form-control" id="adGroupId" placeholder="" value="5541">
             </div>
             <button type="button" class="btn btn-default" id="showbutton">Set</button>
           </form>
@@ -403,67 +402,21 @@
       <div class="row-fluid">
         <div class="col-md-7">
           <div class="demo-container">
-            <div id="placeholder" class="demo-placeholder"></div>
-          </div>
-         </div>
+            <div id="hourplaceholder" class="demo-placeholder"></div>
+          </div>       
+        </div>
         <div class="col-md-5">
           <div class="demo-container">
-            <div id="hourplaceholder" class="demo-placeholder"></div>
+            <div id="placeholder" class="demo-placeholder"></div>
           </div>
-         </div>
+        </div>
       </div>  
 
       <div class="row-fluid">
         <div class="col-md-12">
-          <!-- timeline begin -->         
-            <div class="summary-table" style=" ">
-             <div class="timeline-chart">
-                <div class="chart-col w80">
-                  <div class="summary-content">
-                    <div class="chart-header clearfix">
-                      <span class="timeline-title " id="date_header">Hourly Impression</span>
-                    </div>
-                    <div class="chart-info clearfix x-mr10">
-                      <div class="chart-word">
-                        <div class="chart-word-timeline">
-                          <div class="timeline" id="tl">
-                            
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>                    
-                <div class="chart-col w20">
-                    <div class="summary-content">
-                      <div class="chart-header clearfix">
-                        <span class="timeline-title " id="date_header">Daily Summary</span>
-                        <span class="timeline-sub-title">(2016-1-09)</span>
-                      </div>
-                      <div class="chart-info clearfix x-mt10">
-                        <div class="chart-word ">
-                          <div class="chart-word-timeline">
-                            <ul class="timeline-summary clearfix">
-                              <li>
-                                <span class="timeline-name">Impressions</span>
-                                <span class="timeline-sum word-impr" id="impsCount"></span>
-                              </li>
-                              <li>
-                                <span class="timeline-name">Clicks</span>
-                                <span class="timeline-sum word-clicks" id="clicksCount"></span>
-                              </li>
-
-                            </ul>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-                </div>
-             </div>
-            </div>
-          <!-- timeline end -->
+          <div class="demo-container">
+            <div id="twentyfourplaceholder" class="demo-placeholder"></div>
+          </div>        
         </div>
       </div>
       
@@ -483,13 +436,12 @@
     <!-- bower:js -->
     <script src="/bower_components/jquery/dist/jquery.js"></script>
     <script src="/bower_components/Flot/jquery.flot.js"></script>
-    <script src="/bower_components/Flot/jquery.flot.time.js"></script>
     <script src="/bower_components/chosen-bower/chosen.jquery.js"></script>
     <script src="/bower_components/lodash/lodash.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
-
     <!-- build:js scripts/main.js -->
+    <script src="/bower_components/Flot/jquery.flot.time.js"></script>
     <script src="scripts/main.js"></script>
     <!-- endbuild -->
 
