@@ -9,6 +9,26 @@ $(function() {
 
   var lastHourData = null, lastHourTimeBox = [],minTimeline = [];
 
+  var baseSetting = {
+                      series: {
+                        lines: {
+                          show: true,
+                          fill: false
+                        },
+                        points: {
+                          show: true
+                        },
+                        shadowSize: 0 // Drawing is faster without shadows
+                      },
+                      grid: {
+                        hoverable: true,
+                        borderColor: '#E2E6EE',
+                        borderWidth: 1,
+                        tickColor: '#E2E6EE'
+                      },
+                      colors: ['#e52a32', '#336dc6']
+                    }
+
   var twentyfourData = [];
 
   var fetchInterval = 1000*30;
@@ -403,44 +423,44 @@ $(function() {
   
   //*********************************************************************//
 
-  function initTwentyFourPlot(){
+  function initTwentyFourPlotData(){
+    var data = {'imps':[],'clicks':[]}
     for(var i=0;i<24;i++){
-      twentyfourData.push([i+1,0])
+      data['imps'].push(0);data['clicks'].push(0);
     }
-    return twentyfourData
+    return data
   }
 
-  var twentyfourplot = $.plot('#twentyfourplaceholder',[initTwentyFourPlot()], {   //,getSerialData(0)['clicksData']
-    series: {
-      lines: {
-        show: true,
-        fill: true
-      },
-      points: {
-        show: true,
-        fill: true
-      },
-      shadowSize: 0 // Drawing is faster without shadows
-    },
-    grid: {
-      hoverable: true,
-      borderColor: '#E2E6EE',
-      borderWidth: 1,
-      tickColor: '#E2E6EE'
-    },
-    colors: ['#e52a32', '#336dc6'],
-    yaxis: {
-      max: defaultYaxes,
-      tickDecimals: 0
-    },
-    xaxis: {
-      minTickSize: 4,
-      tickDecimals: 0,
-      min: 1,
-      max: 24
-    },
-    legend: { position: "nw" } //southwest
-  });
+  formatTwentyFourData(initTwentyFourPlotData(),24);
+
+  function timeFormatter(v, axis){
+    return v.toFixed(axis.tickDecimals)+":00"
+  }
+
+
+  var twentyfourplotOption = $.extend({},{
+                                        yaxes: [ { min: 0,
+                                          alignTicksWithAxis: null,
+                                          position: 'left',
+                                          tickFormatter: axesFormatter
+                                        }, {
+                                          min: 0,
+                                          // align if we are to the right
+                                          alignTicksWithAxis: null,
+                                          position: 'right',
+                                          tickFormatter: axesFormatter
+                                        } ],
+                                        xaxis: {
+                                          minTickSize: 3,
+                                          tickDecimals: 0,
+                                          min: 1,
+                                          max: 24,
+                                          tickFormatter: timeFormatter
+                                        },
+                                        legend: { position: "nw" }
+                                      }, baseSetting); 
+
+  var twentyfourplot = $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']],twentyfourplotOption);
 
   $('#twentyfourplaceholder').bind('plothover', function (event, pos, item) {
     showInfo(item,$(this).attr('id'))
@@ -491,55 +511,12 @@ $(function() {
                       'max_clicksData':data['clicks'][length-1]}
   }
 
-  function clicksFormatter(v, axis) {
-    return v.toFixed(axis.tickDecimals);
+  function axesFormatter(v, axis) {
+    return fNumber(v.toFixed(axis.tickDecimals));
   }
 
   function updateTwentyFourPlot(){
-    $.plot('#twentyfourplaceholder',[twentyfourData['impsData']], {   //,,twentyfourData['clicksData']
-        series: {
-          lines: {
-            show: true,
-            fill: true
-          },
-          points: {
-            show: true,
-            fill: true
-          },
-          shadowSize: 0 // Drawing is faster without shadows
-        },
-        grid: {
-          hoverable: true,
-          borderColor: '#E2E6EE',
-          borderWidth: 1,
-          tickColor: '#E2E6EE'
-        },
-        colors: ['#e52a32', '#336dc6'],
-         yaxes: { min: 0 },
-        // yaxes: [ { min: 0 }, {
-        //   // align if we are to the right
-        //   alignTicksWithAxis: null,
-        //   position: 'right',
-        //   tickFormatter: clicksFormatter
-        // } ],
-        xaxis: {
-          minTickSize: 4,
-          tickDecimals: 0,
-          min: 1,
-          max: 24
-        },
-        legend: { position: "nw" } //southwest
-    });
-
-    // twentyfourplot.setData([twentyfourData['impsData'],twentyfourData['clicksData']]);  
-
-    // twentyfourplot.getOptions().yaxes[0].max = twentyfourData['max_impsData']
-
-    // twentyfourplot.getOptions().yaxes[1].max = twentyfourData['max_clicksData']
-
-    // twentyfourplot.setupGrid();
-
-    // twentyfourplot.draw();
+    $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']], twentyfourplotOption);
   }
 
 
