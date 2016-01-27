@@ -343,36 +343,6 @@ $(function() {
 
   $.plot('#hourplaceholder',[lastHourData['impsData'],lastHourData['clicksData']],lastHourInitOption);
 
-                   //    { 
-                   //    series: {
-                   //      lines: {
-                   //        show: true
-                   //      },
-                   //      points: {
-                   //        show: true
-                   //      },
-                   //      shadowSize: 0 // Drawing is faster without shadows
-                   //    },
-                   //    grid: {
-                   //      hoverable: true,
-                   //      borderColor: '#E2E6EE',
-                   //      borderWidth: 1,
-                   //      tickColor: '#E2E6EE'
-                   //    },
-                   //    colors: ['#e52a32'],
-                   //    yaxis: {
-                   //      min: 0,
-                   //      max: scopeData['max_impsData']
-                   //    },
-                   //    xaxis: {
-                   //      mode: "time",
-                   //      timezone: "browser",
-                   //      // minTickSize: [1, "Minutes"],
-                   //      min: minTimeline[0][0],
-                   //      max: minTimeline[59][0]
-                   //    }
-                   // }
-
   $('#hourplaceholder').bind('plothover', function (event, pos, item) {
     showInfo(item,$(this).attr('id'))
   })
