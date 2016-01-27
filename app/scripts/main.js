@@ -401,7 +401,6 @@ $(function() {
     });
   }
 
-
   function getHourSerialData(){
     if(lastHourData==null){    
       return formatData([],60,'lastHour')
@@ -434,7 +433,7 @@ $(function() {
   formatTwentyFourData(initTwentyFourPlotData(),24);
 
   function timeFormatter(v, axis){
-    return v.toFixed(axis.tickDecimals)+":00"
+    return pad(v.toFixed(axis.tickDecimals), 2)+":00"
   }
 
 
@@ -460,7 +459,9 @@ $(function() {
                                         legend: { position: "nw" }
                                       }, baseSetting); 
 
-  var twentyfourplot = $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']],twentyfourplotOption);
+  var twentyfourplotInitOption = _.merge($.extend(true, {}, twentyfourplotOption),{yaxes:[{max:100},{max:100}]})
+
+  var twentyfourplot = $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']],twentyfourplotInitOption);
 
   $('#twentyfourplaceholder').bind('plothover', function (event, pos, item) {
     showInfo(item,$(this).attr('id'))
