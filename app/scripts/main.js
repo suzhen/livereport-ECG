@@ -440,12 +440,14 @@ $(function() {
   var twentyfourplotOption = $.extend({},{
                                         yaxes: [ { min: 0,
                                           alignTicksWithAxis: null,
+                                          tickDecimals: 0,
                                           position: 'left',
                                           tickFormatter: axesFormatter
                                         }, {
                                           min: 0,
                                           // align if we are to the right
                                           alignTicksWithAxis: null,
+                                          tickDecimals: 0,
                                           position: 'right',
                                           tickFormatter: axesFormatter
                                         } ],
