@@ -55,8 +55,8 @@ $(function() {
     }else{
       region = _.map(cities, function(n){return n.toLowerCase()+'shi'})
     }
-    fetchData();
-    getLastHourClicksAndImps();
+    fetchData();realTimeUpdate(); 
+    getLastHourClicksAndImps();updateLastHour();
     getTodayClicksAndImpsByHour();
   }
 
@@ -234,7 +234,7 @@ $(function() {
       }    
     }
     return {'impsData':{data:impsData,label:impsLabel},
-            'clicksData':{data:clicksData,label:clicksLabel},
+            'clicksData':{data:clicksData,label:clicksLabel,yaxis: 2},
             'max_impsData':formatMaxData(max_impsData),
             'max_clicksData':formatMaxData(max_clicksData)}
   }
@@ -244,9 +244,9 @@ $(function() {
       var y = fNumber(item.datapoint[1]);  var x = item.datapoint[0]; var z = item.dataIndex
       var ht = '';
       if(id == 'placeholder'){
-        ht = realTimeBox[x]
+        ht = realTimeBox[x] || 0 
       }else if(id == 'hourplaceholder'){
-        ht = lastHourTimeBox[z]
+        ht = lastHourTimeBox[z] || 0
       }else{
         ht = x+":00"
       }
@@ -258,29 +258,29 @@ $(function() {
     }     
   }
 
-  var plot = $.plot('#placeholder',[getSerialData(0)['impsData']], {   //,getSerialData(0)['clicksData']
-    series: {
-      lines: {
-        show: true,
-        fill: false
-      },
-      points: {
-        show: true
-      },
-      shadowSize: 0 // Drawing is faster without shadows
-    },
-    grid: {
-      hoverable: true,
-      borderColor: '#E2E6EE',
-      borderWidth: 1,
-      tickColor: '#E2E6EE'
-    },
-    colors: ['#e52a32', '#cccccc'],
-    yaxis: {
-      min: 0,
-      max: defaultYaxes
-    }
-  });
+  var plotOption = $.extend({},{  yaxes: [ { min: 0,
+                                          alignTicksWithAxis: null,
+                                          tickDecimals: 0,
+                                          position: 'left',
+                                          tickFormatter: axesFormatter
+                                        }, {
+                                          min: 0,
+                                          // align if we are to the right
+                                          alignTicksWithAxis: null,
+                                          tickDecimals: 0,
+                                          position: 'right',
+                                          tickFormatter: axesFormatter
+                                        } ],
+                                  xaxis: {
+                                    minTickSize: 3,
+                                    tickDecimals: 0,
+                                    min: 0
+                                  }
+                              }, baseSetting); 
+
+  var plotInitOption = _.merge($.extend(true, {}, plotOption),{yaxes:[{max:defaultYaxes},{max:defaultYaxes}]})
+ 
+  $.plot('#placeholder',[getSerialData(0)['impsData'],getSerialData(0)['clicksData']], plotInitOption);
 
   $('<div id=\'tooltip\'></div>').css({
     position: 'absolute',
@@ -297,34 +297,85 @@ $(function() {
 
   var series = 0; 
 
-  var topPoint = defaultYaxes;
+  function realTimeUpdate() {
 
-  function update() {
+    if(totalDataIndex.length != 0 && totalData.length != 0){
+      
+      var newScopeData = getSerialData(series);
+      
+      $.plot('#placeholder',[newScopeData['impsData'],newScopeData['clicksData']], plotOption);
 
-    var newScopeData = getSerialData(series);
+      series++ ;
 
-    plot.setData([newScopeData['impsData']]);  //,newScopeData['clicksData']
+    }
 
-    if(newScopeData['max_impsData'] != topPoint) {
+    setTimeout(realTimeUpdate, updateInterval);
 
-      plot.getOptions().yaxes[0].max = newScopeData['max_impsData']
-
-      plot.setupGrid();
-
-      topPoint = newScopeData['max_impsData'];
-
-    } 
-
-    plot.draw();
-
-    setTimeout(update, updateInterval);
-
-    series++ ; 
   }
 
-  update();
+ 
 
   //*********************************************************************//
+
+
+  var lastHourPlotOption = $.extend({},{  yaxes: [ { min: 0,
+                                          alignTicksWithAxis: null,
+                                          tickDecimals: 0,
+                                          position: 'left',
+                                          tickFormatter: axesFormatter
+                                        }, {
+                                          min: 0,
+                                          // align if we are to the right
+                                          alignTicksWithAxis: null,
+                                          tickDecimals: 0,
+                                          position: 'right',
+                                          tickFormatter: axesFormatter
+                                        } ],
+                                  xaxis: {
+                                    mode: "time",
+                                    timezone: "browser"                                
+                                  }
+                              }, baseSetting); 
+
+  var lastHourInitOption = _.merge($.extend(true, {}, lastHourPlotOption),{yaxes:[{max:defaultYaxes},{max:defaultYaxes}]});
+ 
+  getHourSerialData(null);
+
+  $.plot('#hourplaceholder',[lastHourData['impsData'],lastHourData['clicksData']],lastHourInitOption);
+
+                   //    { 
+                   //    series: {
+                   //      lines: {
+                   //        show: true
+                   //      },
+                   //      points: {
+                   //        show: true
+                   //      },
+                   //      shadowSize: 0 // Drawing is faster without shadows
+                   //    },
+                   //    grid: {
+                   //      hoverable: true,
+                   //      borderColor: '#E2E6EE',
+                   //      borderWidth: 1,
+                   //      tickColor: '#E2E6EE'
+                   //    },
+                   //    colors: ['#e52a32'],
+                   //    yaxis: {
+                   //      min: 0,
+                   //      max: scopeData['max_impsData']
+                   //    },
+                   //    xaxis: {
+                   //      mode: "time",
+                   //      timezone: "browser",
+                   //      // minTickSize: [1, "Minutes"],
+                   //      min: minTimeline[0][0],
+                   //      max: minTimeline[59][0]
+                   //    }
+                   // }
+
+  $('#hourplaceholder').bind('plothover', function (event, pos, item) {
+    showInfo(item,$(this).attr('id'))
+  })
 
   function getLastHourClicksAndImps(){
     $.ajax({
@@ -355,44 +406,8 @@ $(function() {
           for(var i=0;i<60;i++){
             cDay = new Date(y,m,d,hr,parseInt(min)+i);minTimeline.push(cDay.getTime());
           }
-          lastHourData = $.extend(true, {}, data['effect'])
-
-          var scopeData = getHourSerialData();
-          // console.log(scopeData)
-
-          $.plot('#hourplaceholder',[scopeData['impsData']], { 
-                      series: {
-                        lines: {
-                          show: true
-                        },
-                        points: {
-                          show: true
-                        },
-                        shadowSize: 0 // Drawing is faster without shadows
-                      },
-                      grid: {
-                        hoverable: true,
-                        borderColor: '#E2E6EE',
-                        borderWidth: 1,
-                        tickColor: '#E2E6EE'
-                      },
-                      colors: ['#e52a32'],
-                      yaxis: {
-                        min: 0,
-                        max: scopeData['max_impsData']
-                      },
-                      xaxis: {
-                        mode: "time",
-                        timezone: "browser",
-                        // minTickSize: [1, "Minutes"],
-                        min: minTimeline[0][0],
-                        max: minTimeline[59][0]
-                      }
-                   });
-          
-          $('#hourplaceholder').bind('plothover', function (event, pos, item) {
-            showInfo(item,$(this).attr('id'))
-          })
+          getHourSerialData($.extend(true, {}, data['effect']));
+          $.plot('#hourplaceholder',[lastHourData['impsData'],lastHourData['clicksData']],lastHourPlotOption);
         }
       },
       error: function(e){
@@ -401,11 +416,11 @@ $(function() {
     });
   }
 
-  function getHourSerialData(){
-    if(lastHourData==null){    
-      return formatData([],60,'lastHour')
+  function getHourSerialData(data){
+    if(data==null){    
+      lastHourData = formatData([],60,'lastHour')
     }else{
-      return formatData([lastHourData['imps'],lastHourData['clicks']],60,'lastHour')
+      lastHourData = formatData([data['imps'],data['clicks']],60,'lastHour')
     }
   }
 
@@ -416,7 +431,7 @@ $(function() {
     setTimeout(updateLastHour, lastHourUpdateInterval);
   }
 
-  updateLastHour();
+  
 
 
   
@@ -435,7 +450,6 @@ $(function() {
   function timeFormatter(v, axis){
     return pad(v.toFixed(axis.tickDecimals), 2)+":00"
   }
-
 
   var twentyfourplotOption = $.extend({},{
                                         yaxes: [ { min: 0,
@@ -463,7 +477,7 @@ $(function() {
 
   var twentyfourplotInitOption = _.merge($.extend(true, {}, twentyfourplotOption),{yaxes:[{max:100},{max:100}]})
 
-  var twentyfourplot = $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']],twentyfourplotInitOption);
+  $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']],twentyfourplotInitOption);
 
   $('#twentyfourplaceholder').bind('plothover', function (event, pos, item) {
     showInfo(item,$(this).attr('id'))
@@ -521,9 +535,6 @@ $(function() {
   function updateTwentyFourPlot(){
     $.plot('#twentyfourplaceholder',[twentyfourData['impsData'],twentyfourData['clicksData']], twentyfourplotOption);
   }
-
-
-  
 
     
 });
