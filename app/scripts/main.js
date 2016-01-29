@@ -1,6 +1,8 @@
 $(function() {
   var campaignId = 0,adGroupId = 0,region = []; 
 
+  var today = new Date(), _today_year = today.getFullYear(), _today_month = today.getMonth(), _today_day = today.getDate()
+
   var impsLabel = 'impressions', clicksLabel = 'clicks';
 
   var step = 3, totalPoints = 25, defaultYaxes = 5; //make sure not less 60/step
@@ -371,7 +373,7 @@ $(function() {
           for(var i=0;i<60;i++){ lastHourTimeBox.push(formatMin(begin_minutes+i)) }  
           //create xaxis array
           minTimeline = []
-          var today = new Date(); var cDay = new Date();
+          today = new Date(); var cDay = new Date();
           var hm = lastHourTimeBox[0].split(':');
           var hr = hm[0]; var min = hm[1];
           var y = today.getFullYear(); var m = today.getMonth(); var d = (begin_minutes > 1380 ? today.getDate()-1 : today.getDate())
@@ -420,6 +422,10 @@ $(function() {
     return pad(v.toFixed(axis.tickDecimals), 2)+":00"
   }
 
+  // console.log(new Date(_today_year,_today_month,_today_day,1))
+  // console.log(new Date(_today_year,_today_month,_today_day+1))
+
+
   var twentyfourplotOption = $.extend({},{
                                         yaxes: [ { min: 0,
                                           alignTicksWithAxis: null,
@@ -434,10 +440,18 @@ $(function() {
                                           position: 'right',
                                           tickFormatter: axesFormatter
                                         } ],
+                                        // xaxis: {
+                                        //   mode: "time",
+                                        //   timezone: "browser",
+                                        //   minTickSize: [2, "hour"],
+                                        //   min: (new Date(_today_year,_today_month,_today_day,0)).getTime(),
+                                        //   max: (new Date(_today_year,_today_month,_today_day,23)).getTime(),
+                                        //   twelveHourClock: false  
+                                        // }, 
                                         xaxis: {
                                           minTickSize: 3,
                                           tickDecimals: 0,
-                                          min: 1,
+                                          min: 0,
                                           max: 24,
                                           tickFormatter: timeFormatter
                                         },
@@ -488,8 +502,14 @@ $(function() {
 
   function formatTwentyFourData(data,length){
     var max_impsData = 0 , max_clicksData = 0 , impsData = [] , clicksData = []; 
-    for(var j=1;j<=length;j++){
-     impsData.push([j, data['imps'][j-1]]);clicksData.push([j,data['clicks'][j-1]])
+    // for(var j=0;j<length;j++){
+    //  var cDayTime = (new Date(_today_year,_today_month,_today_day,j)).getTime()
+    //  impsData.push([cDayTime, data['imps'][j]]);clicksData.push([cDayTime,data['clicks'][j]])
+    // }
+    impsData.push([0, 0]);clicksData.push([0,0])
+
+    for(var j=0;j<length;j++){
+     impsData.push([j+1, data['imps'][j]]);clicksData.push([j+1,data['clicks'][j]])
     }
     twentyfourData = {'impsData':{data:impsData,label:impsLabel},
                       'clicksData':{data:clicksData,label:clicksLabel,yaxis: 2},
@@ -543,7 +563,12 @@ $(function() {
     var days = 0 , hours = 0;
     if(!_.isNull(data)){
       $.each(monitors, function(index, value){
-        days = data[value]['impressions'].length;
+        var days = data[value]['impressions'].length;
+        var first_day_hours = data[value]['impressions'][0].length
+        var last_day_hours = data[value]['impressions'][days-1].length
+
+
+
         // console.log(data[value])
         hours = _.flatten(data[value]['impressions'])
         // console.log(hours)
